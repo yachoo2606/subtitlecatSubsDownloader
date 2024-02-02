@@ -25,9 +25,14 @@ def main():
         match = re.search(pattern, file)
         if match:
             print(f"Found: {match.group(1)} in {file}")
-            codes.append(match.group(1))
+            codes.append({
+                "code": match.group(1),
+                "file": file
+                })
 
-    for code in tqdm(codes):
+    for fileDict in tqdm(codes):
+        code = fileDict["code"]
+        filename = fileDict["file"].rsplit(".", 1)[0]
         print(f"processing code: {code}...")
         url = baseSearchLink + code
         r = requests.get(url)
@@ -45,8 +50,7 @@ def main():
                     print("\t\t" + baseLink + downloadLink.get('href'))
                     response = requests.get(baseLink + downloadLink.get('href'))
                     if response.status_code == 200:
-                        filename = downloadLink.get('href').split("/")[-1]
-                        with open(basePath + filename, 'wb') as file:
+                        with open(basePath + filename+".srt", 'wb') as file:
                             file.write(response.content)
                         print(f"Downloaded {filename}")
                     else:
